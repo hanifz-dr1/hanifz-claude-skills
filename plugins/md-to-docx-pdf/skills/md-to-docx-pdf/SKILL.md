@@ -1,6 +1,6 @@
 ---
 name: md-to-docx-pdf
-description: Use this skill when the user wants to render a Markdown document into a styled, publication-quality DOCX and/or PDF — e.g. "build a PDF from this markdown", "generate the report docx", "turn these .md sections into a formatted document with a title page and tables". It drives a bundled python-docx renderer (title page, inline bold/italic/code, content-weighted auto-width tables, lists, checkboxes, fenced code, embedded images) and converts to PDF via LibreOffice headless. Pairs with figure skills: figures authored elsewhere embed via standard Markdown image syntax.
+description: Use this skill when the user wants to render a Markdown document into a styled, publication-quality DOCX and/or PDF — e.g. "build a PDF from this markdown", "generate the report docx", "turn these .md sections into a formatted document with a title page and tables". It drives a bundled python-docx renderer (title page, inline bold/italic/code, content-weighted auto-width tables, lists, checkboxes, fenced code, embedded images) and converts to PDF via LibreOffice headless. Pairs with figure skills; figures authored elsewhere embed via standard Markdown image syntax.
 version: 0.1.0
 ---
 

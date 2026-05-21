@@ -1,6 +1,6 @@
 ---
 name: codex-adversarial-review
-description: Use this skill when the user wants a substantive artefact stress-tested by an adversarial second model before finalising — e.g. "have Codex attack this", "red-team this claim/argument", "get an adversarial review of this section/PR", "find the weaknesses in this draft". It runs a two-round structured loop with a Codex MCP/CLI: round 1 briefs the model with the artefact + surrounding vocabulary + a numbered attack-vector list and asks for load-bearing-vs-nitpick verdicts and concrete rewrites; you synthesise v2 with explicit adopt/reject/pushback; round 2 re-attacks v2 and rules on the pushbacks. Skip for typos and mechanical edits.
+description: Use this skill when the user wants a substantive artefact stress-tested by an adversarial second model before finalising — e.g. "have Codex attack this", "red-team this claim/argument", "get an adversarial review of this section/PR", "find the weaknesses in this draft". It runs a two-round structured loop with a Codex MCP/CLI. Round 1 briefs the model with the artefact + surrounding vocabulary + a numbered attack-vector list and asks for load-bearing-vs-nitpick verdicts and concrete rewrites; you synthesise v2 with explicit adopt/reject/pushback; round 2 re-attacks v2 and rules on the pushbacks. Skip for typos and mechanical edits.
 version: 0.1.0
 ---
 
