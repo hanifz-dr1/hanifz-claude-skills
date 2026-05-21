@@ -1,0 +1,20 @@
+{
+  "name": "md-to-docx-pdf",
+  "version": "0.1.0",
+  "description": "Render Markdown to a styled DOCX and PDF (PDF via LibreOffice headless). Title page, inline bold/italic/code with escapes, content-weighted auto-width tables, lists, checkboxes, fenced code, embedded images. Single-document or multi-document JSON config. Pairs with drawio-figure-iterate for figures.",
+  "author": {
+    "name": "Abdul Hanif Bin Zaini"
+  },
+  "license": "MIT",
+  "keywords": [
+    "markdown",
+    "docx",
+    "pdf",
+    "libreoffice",
+    "python-docx",
+    "document-generation",
+    "report",
+    "publishing",
+    "tables"
+  ]
+}

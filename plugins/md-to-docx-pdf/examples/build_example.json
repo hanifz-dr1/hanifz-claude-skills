@@ -1,0 +1,14 @@
+{
+  "documents": [
+    {
+      "inputs": ["example.md"],
+      "out_docx": "example.docx",
+      "out_pdf": "example.pdf",
+      "title": "Example Report",
+      "subtitle": "Demonstrating md_to_docx_pdf rendering",
+      "author": "Jane Doe",
+      "institute": "Example Org",
+      "banner": "CONFIDENTIAL"
+    }
+  ]
+}

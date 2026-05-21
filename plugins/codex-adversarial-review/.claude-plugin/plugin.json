@@ -1,0 +1,20 @@
+{
+  "name": "codex-adversarial-review",
+  "version": "0.1.0",
+  "description": "A methodology for stress-testing substantive prose, claims, or code with an adversarial second model (Codex) in two structured rounds: brief with artefact + vocabulary + a numbered attack-vector list, synthesise v2 with explicit adopt/reject/pushback, then re-attack v2 and rule on the pushbacks. Synthesise, never relay. Requires a Codex MCP/CLI (e.g. the codex@openai-codex plugin).",
+  "author": {
+    "name": "Abdul Hanif Bin Zaini"
+  },
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "review",
+    "adversarial",
+    "red-team",
+    "critique",
+    "methodology",
+    "prose",
+    "claims",
+    "code-review"
+  ]
+}

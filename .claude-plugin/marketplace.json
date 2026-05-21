@@ -16,6 +16,24 @@
         "name": "Abdul Hanif Bin Zaini"
       },
       "source": "./plugins/drawio-figure-iterate"
+    },
+    {
+      "name": "md-to-docx-pdf",
+      "description": "Render Markdown to a styled DOCX and PDF (PDF via LibreOffice headless): title page, inline formatting, content-weighted auto-width tables, lists, code, embedded images. Single- or multi-document builds.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Abdul Hanif Bin Zaini"
+      },
+      "source": "./plugins/md-to-docx-pdf"
+    },
+    {
+      "name": "codex-adversarial-review",
+      "description": "A two-round methodology for stress-testing prose, claims, or code with an adversarial second model (Codex): brief with attack vectors, synthesise adopt/reject/pushback, re-attack and rule on pushbacks.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Abdul Hanif Bin Zaini"
+      },
+      "source": "./plugins/codex-adversarial-review"
     }
   ]
 }

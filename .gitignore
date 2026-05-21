@@ -2,6 +2,10 @@
 **/figure_generator_demo.drawio
 **/figure_generator_demo.png
 
+# Generated example documents (regenerable from md_to_docx_pdf)
+plugins/md-to-docx-pdf/examples/*.docx
+plugins/md-to-docx-pdf/examples/*.pdf
+
 # Python
 __pycache__/
 *.pyc
