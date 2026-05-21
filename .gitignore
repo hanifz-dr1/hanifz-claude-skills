@@ -1,0 +1,12 @@
+# Generated figure artifacts (regenerable from the .py generators)
+**/figure_generator_demo.drawio
+**/figure_generator_demo.png
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store

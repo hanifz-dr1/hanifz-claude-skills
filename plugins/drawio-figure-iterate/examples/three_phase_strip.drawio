@@ -1,0 +1,157 @@
+<mxfile host="app.diagrams.net" agent="figure-generator">
+  <diagram id="phasestrip" name="Three-phase strip">
+    <mxGraphModel dx="438" dy="325" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="820" pageHeight="560" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" value="Three-phase state management across a handoff" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#1f1f1f;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="10" y="10" width="800" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="caption" parent="1" value="Phases run sequentially &lt;b&gt;P1 -&gt; P2 -&gt; P3&lt;/b&gt;; one report is delivered every cycle in &lt;b&gt;every phase&lt;/b&gt;." style="text;html=1;fontSize=11;fontColor=#444444;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="10" y="44" width="800" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_frame" parent="1" value="" style="rounded=2;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1">
+          <mxGeometry x="10" y="76" width="257" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_hdr" parent="1" value="Phase 1 - Setup" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontStyle=1;fontSize=15;fontColor=#ffffff;letterSpacing=1;" vertex="1">
+          <mxGeometry x="10" y="76" width="257" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_reported_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf1fb;strokeColor=#6c8ebf;strokeWidth=1;" vertex="1">
+          <mxGeometry x="14" y="112" width="249" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_reported_lbl" parent="1" value="REPORTED" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#3f5d80;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="22" y="116" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_reported_txt" parent="1" value="Initial state in the &lt;b&gt;source frame&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="14" y="130" width="249" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_entry_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf1fb;strokeColor=#6c8ebf;strokeWidth=1;" vertex="1">
+          <mxGeometry x="14" y="160" width="249" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_entry_lbl" parent="1" value="ENTRY" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#3f5d80;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="22" y="164" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_entry_txt" parent="1" value="Trigger condition &lt;i&gt;flag = on&lt;/i&gt; observed" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="14" y="178" width="249" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_exit_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf1fb;strokeColor=#6c8ebf;strokeWidth=1;" vertex="1">
+          <mxGeometry x="14" y="224" width="249" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_exit_lbl" parent="1" value="EXIT" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#3f5d80;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="22" y="228" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_exit_txt" parent="1" value="Handoff command issued" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="14" y="242" width="249" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_note_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf1fb;strokeColor=#6c8ebf;strokeWidth=1;" vertex="1">
+          <mxGeometry x="14" y="272" width="249" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_note_lbl" parent="1" value="NOTE" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#3f5d80;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="22" y="276" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_note_txt" parent="1" value="Covers init, dwell, and the opening handshake" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="14" y="290" width="249" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_frame" parent="1" value="" style="rounded=2;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d79b00;strokeWidth=2;" vertex="1">
+          <mxGeometry x="281" y="76" width="257" height="276" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_hdr" parent="1" value="Phase 2 - Transform" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d79b00;strokeColor=#d79b00;align=center;verticalAlign=middle;fontStyle=1;fontSize=15;fontColor=#ffffff;letterSpacing=1;" vertex="1">
+          <mxGeometry x="281" y="76" width="257" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_reported_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2e0;strokeColor=#d79b00;strokeWidth=1;" vertex="1">
+          <mxGeometry x="285" y="112" width="249" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_reported_lbl" parent="1" value="REPORTED" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#7a5300;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="293" y="116" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_reported_txt" parent="1" value="Chained transform &lt;i&gt;src -&gt; mid -&gt; dest&lt;/i&gt;" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="285" y="130" width="249" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_entry_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2e0;strokeColor=#d79b00;strokeWidth=1;" vertex="1">
+          <mxGeometry x="285" y="176" width="249" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_entry_lbl" parent="1" value="ENTRY" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#7a5300;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="293" y="180" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_entry_txt" parent="1" value="Handoff command from Phase 1" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="285" y="194" width="249" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_exit_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2e0;strokeColor=#d79b00;strokeWidth=1;" vertex="1">
+          <mxGeometry x="285" y="224" width="249" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_exit_lbl" parent="1" value="EXIT" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#7a5300;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="293" y="228" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_exit_txt" parent="1" value="Waypoint reached (position + speed)" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="285" y="242" width="249" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_note_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2e0;strokeColor=#d79b00;strokeWidth=1;" vertex="1">
+          <mxGeometry x="285" y="288" width="249" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_note_lbl" parent="1" value="NOTE" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#7a5300;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="293" y="292" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_note_txt" parent="1" value="Self-report still arrives in the source frame" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="285" y="306" width="249" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_frame" parent="1" value="" style="rounded=2;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9673a6;strokeWidth=2;" vertex="1">
+          <mxGeometry x="552" y="76" width="257" height="244" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_hdr" parent="1" value="Phase 3 - Hold + Recover" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#9673a6;strokeColor=#9673a6;align=center;verticalAlign=middle;fontStyle=1;fontSize=15;fontColor=#ffffff;letterSpacing=1;" vertex="1">
+          <mxGeometry x="552" y="76" width="257" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_reported_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1ebf4;strokeColor=#9673a6;strokeWidth=1;" vertex="1">
+          <mxGeometry x="556" y="112" width="249" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_reported_lbl" parent="1" value="REPORTED" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#5e4570;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="564" y="116" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_reported_txt" parent="1" value="Last transformed pose, &lt;b&gt;frozen&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="556" y="130" width="249" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_entry_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1ebf4;strokeColor=#9673a6;strokeWidth=1;" vertex="1">
+          <mxGeometry x="556" y="160" width="249" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_entry_lbl" parent="1" value="ENTRY" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#5e4570;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="564" y="164" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_entry_txt" parent="1" value="Waypoint reached (Phase 2 exit)" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="556" y="178" width="249" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_exit_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1ebf4;strokeColor=#9673a6;strokeWidth=1;" vertex="1">
+          <mxGeometry x="556" y="208" width="249" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_exit_lbl" parent="1" value="EXIT" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#5e4570;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="564" y="212" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_exit_txt" parent="1" value="Re-localisation detected" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="556" y="226" width="249" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_note_box" parent="1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1ebf4;strokeColor=#9673a6;strokeWidth=1;" vertex="1">
+          <mxGeometry x="556" y="256" width="249" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_note_lbl" parent="1" value="NOTE" style="text;html=1;fontSize=10;fontStyle=1;fontColor=#5e4570;align=left;verticalAlign=top;letterSpacing=2;" vertex="1">
+          <mxGeometry x="564" y="260" width="233" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_note_txt" parent="1" value="Lane A reports while Lane B recovers in background" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;fontSize=13;fontColor=#1f1f1f;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="556" y="274" width="249" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="transition_1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.0;" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="268" y="92" as="sourcePoint" />
+            <mxPoint x="280" y="92" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="transition_2" parent="1" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.0;" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="539" y="92" as="sourcePoint" />
+            <mxPoint x="551" y="92" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="footer" parent="1" value="&lt;i&gt;italic&lt;/i&gt; = field/variable name; identifiers vary by embodiment." style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#666666;whiteSpace=wrap;" vertex="1">
+          <mxGeometry x="10" y="366" width="800" height="22" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

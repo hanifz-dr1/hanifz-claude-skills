@@ -1,0 +1,21 @@
+{
+  "name": "claude-skills",
+  "owner": {
+    "name": "Abdul Hanif Bin Zaini"
+  },
+  "metadata": {
+    "description": "A curated collection of Claude Code skills, packaged as installable plugins. Add the marketplace once, then install individual skills on demand.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "drawio-figure-iterate",
+      "description": "Author print-legible draw.io figures through a generate -> export -> read -> score -> fix loop. Bundles the iterate skill, a headless-export wrapper, a PIL-metrics generator, and an optional draw.io MCP server.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Abdul Hanif Bin Zaini"
+      },
+      "source": "./plugins/drawio-figure-iterate"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "drawio-figure-iterate",
+  "version": "0.1.0",
+  "description": "Feedback-loop authoring of print-legible draw.io figures: author mxGraph XML, export PNG headlessly, read it back, score against a persisted requirements doc, fix, repeat. Bundles a PIL-metrics figure generator for overflow-proof multi-chip diagrams and an optional draw.io MCP server for browser inspection.",
+  "author": {
+    "name": "Abdul Hanif Bin Zaini"
+  },
+  "license": "MIT",
+  "keywords": [
+    "drawio",
+    "diagrams",
+    "mxgraph",
+    "figure",
+    "headless-export",
+    "png",
+    "iterate",
+    "feedback-loop",
+    "pil",
+    "print-legible",
+    "technical-documentation"
+  ]
+}
