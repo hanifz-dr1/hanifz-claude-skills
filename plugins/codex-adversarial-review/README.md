@@ -38,7 +38,7 @@ thinking before round 1.
 ## Setup
 
 ```
-/plugin install codex-adversarial-review@claude-skills
+/plugin install codex-adversarial-review@hanifz-claude-skills
 # plus a Codex reviewer, e.g.:
 /plugin marketplace add openai/codex-plugin-cc
 /plugin install codex@openai-codex

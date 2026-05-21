@@ -1,4 +1,4 @@
-# claude-skills
+# hanifz-claude-skills
 
 A curated collection of [Claude Code](https://claude.com/claude-code) skills,
 packaged as installable plugins. Add the marketplace once, then install
@@ -7,13 +7,13 @@ individual skills on demand.
 ## Install
 
 ```
-/plugin marketplace add <your-github-user>/claude-skills
+/plugin marketplace add hanifz-dr1/hanifz-claude-skills
 ```
 
 Then install any skill below:
 
 ```
-/plugin install <name>@claude-skills
+/plugin install <name>@hanifz-claude-skills
 ```
 
 ## Skills in this collection
@@ -30,7 +30,7 @@ own `README.md`, `SKILL.md`, and any helper scripts/MCP config._
 ## Repository layout
 
 ```
-claude-skills/
+hanifz-claude-skills/
 ├── .claude-plugin/
 │   └── marketplace.json          # lists every skill/plugin in the collection
 └── plugins/

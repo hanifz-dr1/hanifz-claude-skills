@@ -37,8 +37,8 @@ needs a draw.io binary on the machine (next section).
 ### 1. Install the plugin (provides the skill + optional MCP)
 
 ```
-/plugin marketplace add <your-github-user>/claude-skills
-/plugin install drawio-figure-iterate@claude-skills
+/plugin marketplace add hanifz-dr1/hanifz-claude-skills
+/plugin install drawio-figure-iterate@hanifz-claude-skills
 ```
 
 Installing wires the optional `drawio` MCP server (`npx -y @drawio/mcp`, needs

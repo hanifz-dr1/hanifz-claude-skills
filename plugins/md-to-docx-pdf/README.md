@@ -27,7 +27,7 @@ with a figure skill, then build the deliverable here.
 ## Setup
 
 ```
-/plugin install md-to-docx-pdf@claude-skills
+/plugin install md-to-docx-pdf@hanifz-claude-skills
 pip install python-docx
 # plus a LibreOffice install providing `libreoffice` or `soffice` on PATH
 # (set $LIBREOFFICE_BIN to override). Without it, the DOCX still builds; PDF is skipped.
