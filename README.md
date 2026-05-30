@@ -23,6 +23,7 @@ Then install any skill below:
 | [**drawio-figure-iterate**](plugins/drawio-figure-iterate/) | Author print-legible draw.io figures through a generate → export → read-back → score → fix loop. Bundles a headless PNG exporter, a PIL-metrics generator for overflow-proof multi-chip figures, and an optional draw.io MCP server. |
 | [**md-to-docx-pdf**](plugins/md-to-docx-pdf/) | Render Markdown to a styled DOCX + PDF (via LibreOffice headless): title page, inline formatting, content-weighted auto-width tables, lists, code, embedded images. Single- or multi-document builds. Pairs with `drawio-figure-iterate`. |
 | [**codex-adversarial-review**](plugins/codex-adversarial-review/) | A two-round methodology for stress-testing prose, claims, or code with an adversarial second model (Codex): brief with attack vectors → synthesise adopt/reject/pushback → re-attack and rule on pushbacks. Requires a Codex MCP/CLI. |
+| [**cc-statusline**](plugins/cc-statusline/) | Install or port a multi-line Claude Code `statusLine` read entirely from the CLI's stdin JSON: model + cwd, upstream git repo + branch, a context-window progress bar with token counts, and the 5-hour & 7-day rate-limit windows with reset countdowns. Idempotent install; every segment degrades gracefully. |
 
 _More skills will be added over time. Each lives under `plugins/<name>/` with its
 own `README.md`, `SKILL.md`, and any helper scripts/MCP config._
