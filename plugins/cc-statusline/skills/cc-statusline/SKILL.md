@@ -1,6 +1,6 @@
 ---
 name: cc-statusline
-description: Install or port a 4-line Claude Code status line dashboard — line 1 model + cwd, line 2 the upstream git repo + branch, line 3 a context-window progress bar with token counts, line 4 the 5-hour & 7-day subscription rate-limit usage with reset countdowns. Use when the user wants to set up, copy to another machine, troubleshoot, or customize their Claude Code statusLine.
+description: Install or port a 4-line Claude Code status line dashboard — line 1 model + cwd, line 2 the upstream git repo + branch, line 3 a context-window progress bar with token counts, line 4 usage that adapts to billing mode (subscription 5h & 7d rate-limit windows with reset countdowns, or for enterprise/API/Bedrock/Vertex/Foundry billing "session cost $X · duration Y", prefixed with the detected mode when an env var names it). Use when the user wants to set up, copy to another machine, troubleshoot, customize, or handle subscription vs enterprise billing for their Claude Code statusLine.
 ---
 
 # Status line dashboard
@@ -8,13 +8,22 @@ description: Install or port a 4-line Claude Code status line dashboard — line
 A multi-line Claude Code `statusLine` that reads everything from the JSON the CLI
 pipes to the status-line command on stdin — no external services, no polling.
 
-Rendered output:
+Rendered output — on a **subscription** plan (line 4 = rate-limit windows):
 
 ```
 Opus 4.8  ~/ws/edh_decks
 hanifz-dr1/iron_td_drafts ⎇ main
 ctx [██████░░░░░░░░] 43%   85k/1M
 5h:43% (resets 2h41m)   7d:18% (resets 4d3h)
+```
+
+…and on **enterprise / API** billing (line 4 = session cost + duration):
+
+```
+Opus 4.8  ~/ws/edh_decks
+hanifz-dr1/iron_td_drafts ⎇ main
+ctx [██░░░░░░░░░░░░] 12%   24k/1M
+session cost $1.29 · duration 1h9m
 ```
 
 - **Line 1** — model display name + cwd (home shortened to `~`).
@@ -24,14 +33,26 @@ ctx [██████░░░░░░░░] 43%   85k/1M
   `⎇ <branch>`; outside any repo the line reads `⎇ no git`.
 - **Line 3** — context window as a 14-cell progress bar + compact token counts
   (`85k/1M`, `156k/200k`).
-- **Line 4** — the two subscription rate-limit windows from `/usage`: the
-  5-hour rolling window and the 7-day (weekly) window, each as `% used` plus a
-  countdown to reset.
+- **Line 4** — usage, which adapts to the billing mode:
+  - **Subscription** (claude.ai Pro/Max/Team): the two rate-limit windows from
+    `/usage` — 5-hour rolling and 7-day (weekly), each as `% used` + a reset
+    countdown.
+  - **Enterprise / API key / Bedrock / Vertex / Foundry / gateway**: these never
+    report subscription windows, so line 4 instead shows a `/cost`-style readout,
+    `session cost $<cost> · duration <wall-clock>`, built from the payload's
+    `cost` block. For the env-detected modes it is prefixed with the mode, e.g.
+    `api  session cost $0.74 · duration 12m34s`; for claude.ai enterprise (no env
+    signal) it is the bare `session cost $1.29 · duration 1h9m`.
 
 Every segment degrades gracefully: any field missing from the payload is
-omitted, and an empty line is dropped (a fresh session with no rate-limit data
-yet renders without the rate-limit line, then fills it in after the first API
-response).
+omitted, and an empty line is dropped. Line 4 stays silent only when there are
+no subscription windows, no billing-env signal, *and* no positive session cost —
+which covers a fresh subscription session before its first API response (windows
+*and* cost both populate after). Once `cost.total_cost_usd > 0` with no windows
+(the steady state under claude.ai enterprise), line 4 shows the session cost +
+duration: a subscription session with API activity would have populated
+`rate_limits` instead, and a fresh one has cost 0, so a positive cost with no
+windows reliably means a non-subscription billing mode.
 
 ## How it works — the statusLine contract
 
@@ -56,19 +77,40 @@ relies on (verified against the CLI's payload constructor, Claude Code 2.1.156):
     },                                        // resets_at is epoch SECONDS.
     "seven_day": { "used_percentage": 17.8, "resets_at": 1780320000 }
   },
-  "cost": { "total_cost_usd": 0.74, "total_lines_added": 128, ... },  // unused here
+  "cost": { "total_cost_usd": 0.74, "total_duration_ms": 754000, ... },  // line 4 cost + duration
   "exceeds_200k_tokens": false
 }
 ```
 
 Key facts that are easy to get wrong:
 
-- **`rate_limits` is conditional.** The CLI only adds it when it has rate-limit
-  state from at least one API response this session (constructor gate:
-  `(v.five_hour || v.seven_day) && { rate_limits: v }`). So line 3 is legitimately
-  absent on a brand-new session's first render, and absent entirely on raw
-  API-key billing (no subscription windows). This is NOT a bug — don't try to
-  source it from the transcript JSONL; the windows are not logged there.
+- **`rate_limits` is conditional, and subscription-only.** The CLI only adds it
+  when it has rate-limit state from at least one API response this session
+  (constructor gate: `(v.five_hour || v.seven_day) && { rate_limits: v }`), and
+  only for **claude.ai subscription auth** (Pro/Max, and by inheritance Team).
+  So line 4's window form is legitimately absent on a brand-new subscription
+  session's first render, and absent **entirely** under API-key, Bedrock,
+  Vertex, Foundry, gateway, and (apparently) claude.ai **enterprise** billing.
+  This is NOT a bug — don't try to source it from the transcript JSONL; the
+  windows are not logged there.
+- **The payload has no billing-mode field.** It is intentionally
+  billing-agnostic — nothing in the JSON says subscription vs enterprise vs API.
+  So for the non-subscription line 4, the script detects the mode from the
+  **environment the CLI exports to the statusLine subprocess** (it reliably
+  inherits the CLI's env): `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`,
+  `CLAUDE_CODE_USE_FOUNDRY`, `ANTHROPIC_API_KEY`, then `ANTHROPIC_AUTH_TOKEN` /
+  `ANTHROPIC_BASE_URL` (gateway). `CLAUDE_CODE_OAUTH_TOKEN` is deliberately
+  ignored — it is a *subscription* token (from `claude setup-token`) and still
+  yields `rate_limits`. A claude.ai enterprise login reports no windows and sets
+  none of these env vars, so it can't be *labeled* with a mode — but the script
+  still renders its `session cost · duration` whenever `cost.total_cost_usd > 0`
+  (see the line-4 logic above), so enterprise is no longer silent in steady state.
+- **`cost.total_cost_usd` is a client-side estimate**, rendered as the line-4
+  readout for non-subscription modes when > 0, alongside `total_duration_ms`
+  (formatted as wall-clock, e.g. `1h9m`). It may differ from an actual
+  enterprise/API bill — treat it as a session indicator, not invoicing. The
+  payload also carries `total_lines_added/removed`; the default layout omits
+  them to keep line 4 short (re-add per Customization).
 - **`used_percentage` is already 0-100** (the CLI computes `utilization * 100`).
 - **`resets_at` is epoch seconds.** The script also accepts ISO-8601 defensively.
 - This data is the same on macOS and Linux and across models — it's part of the
@@ -127,13 +169,22 @@ NOW=$(date +%s); FH=$((NOW + 9660)); SD=$((NOW + 360000))
 # Full dashboard — run from inside a git repo to populate line 2
 printf '{"model":{"display_name":"Opus 4.8"},"workspace":{"current_dir":"%s"},"context_window":{"used_percentage":43,"total_input_tokens":85300,"context_window_size":1000000},"rate_limits":{"five_hour":{"used_percentage":43.2,"resets_at":%s},"seven_day":{"used_percentage":17.8,"resets_at":%s}}}' "$PWD" "$FH" "$SD" | sh "$SH"; echo
 
-# Fresh session (no rate_limits), non-repo dir -> model/cwd, "⎇ no git", ctx
+# Fresh subscription session (no rate_limits, no billing env) -> no line 4
 printf '{"model":{"display_name":"Opus 4.8"},"cwd":"%s","context_window":{"used_percentage":4,"total_input_tokens":8000,"context_window_size":1000000}}' "/tmp" | sh "$SH"; echo
+
+# Enterprise / API-billed (no rate_limits) -> line 4 "session cost … · duration …"
+ENT='{"model":{"display_name":"Opus 4.8"},"cwd":"/tmp","context_window":{"used_percentage":12,"total_input_tokens":24000,"context_window_size":1000000},"cost":{"total_cost_usd":0.74,"total_duration_ms":754000}}'
+printf '%s' "$ENT" | sh "$SH"; echo                                          # -> session cost $0.74 · duration 12m34s  (enterprise: no mode prefix)
+printf '%s' "$ENT" | ANTHROPIC_API_KEY=sk-test sh "$SH"; echo                # -> api  session cost $0.74 · duration 12m34s
+printf '%s' "$ENT" | env -u ANTHROPIC_API_KEY CLAUDE_CODE_USE_BEDROCK=1 sh "$SH"; echo   # -> bedrock  session cost $0.74 · duration 12m34s
 ```
 
 Expected: the first prints 4 lines (model/cwd, `<repo> ⎇ <branch>`,
 `ctx [...] 43% 85k/1M`, `5h:43% (resets …)   7d:18% (resets …)`); the second
-prints 3 lines, with `⎇ no git` for the git line and no rate-limit line.
+prints 3 lines, with `⎇ no git` and no line 4 (fresh subscription, cost 0); the
+enterprise case prints a bare `session cost $0.74 · duration 12m34s`, and the
+API/Bedrock cases prefix it with the mode. (With `total_cost_usd` of 0 and an
+env var set, line 4 is just the bare mode label, e.g. `vertex`.)
 
 ## After install — this is a one-off
 
@@ -182,10 +233,11 @@ settings, so the status line keeps rendering.
   same block.
 - **Different model info on line 1**: line 1 is just `model` + `cwd`; extend
   `line1` to add more.
-- **Re-add session cost**: the payload's `cost.total_cost_usd`,
-  `cost.total_lines_added/removed`, `cost.total_duration_ms` are available; a
-  prior version rendered `$0.74 +128/-34 12m34s`. Add another line if wanted.
-  (Note: that's API/usage *cost*, distinct from the rate-limit *windows*.)
+- **Line 4 cost format**: non-subscription line 4 is built as `cost_detail`
+  (`session cost $X · duration Y`). Edit those assignments to reword the labels,
+  change the `·` separator, or re-add lines changed — the payload still carries
+  `cost.total_lines_added/removed`, e.g. append
+  `cost_detail="$cost_detail · +${add}/-${rem}"`.
 - **Collapse to fewer lines**: concatenate
   `line1`/`branch_segment`/`ctx_segment`/`win_segment` with two spaces instead of
   `\n` at the bottom of the script.
@@ -202,12 +254,17 @@ file is unavailable — keep the two in sync.
 #   Line 1: model · cwd
 #   Line 2: git — upstream repo (owner/group/name) · branch
 #   Line 3: context window  — labeled progress bar + token counts
-#   Line 4: rate-limit windows — 5-hour & 7-day (% used + reset countdown)
+#   Line 4: usage — subscription rate-limit windows (5h & 7d), OR, for
+#           enterprise/API/cloud billing, "session cost $X · duration Y".
 #
 # All segments degrade gracefully: a field absent from the stdin payload is
-# omitted, and its line is dropped. `rate_limits` only appears once the CLI
-# has seen rate-limit headers from an API response, so the rate-limit line may
-# be absent on a fresh session's first render, then populate.
+# omitted, and its line is dropped. `rate_limits` only appears for claude.ai
+# subscription auth (Pro/Max/Team) and only once the CLI has seen rate-limit
+# headers from an API response — so on subscription it may be absent on a fresh
+# session's first render, then populate. Enterprise/API-key/Bedrock/Vertex/
+# Foundry billing never reports it; line 4 instead shows the session cost +
+# wall-clock duration, prefixed with the billing mode when an env var names it
+# (api/bedrock/vertex/foundry/gateway) and bare otherwise (claude.ai enterprise).
 input=$(cat)
 
 model=$(echo "$input" | jq -r '.model.display_name // "Claude"')
@@ -294,6 +351,22 @@ fmt_reset() {
 }
 
 # ---------------------------------------------------------------------------
+# Helper: humanize a millisecond duration -> "1h9m" / "12m34s" / "45s".
+# Prints nothing for empty / non-integer / zero input.
+# ---------------------------------------------------------------------------
+fmt_dur() {
+  ms="$1"
+  case "$ms" in ''|*[!0-9]*) return 0 ;; esac
+  s=$(( ms / 1000 ))
+  [ "$s" -gt 0 ] 2>/dev/null || return 0
+  h=$(( s / 3600 )); m=$(( (s % 3600) / 60 )); sec=$(( s % 60 ))
+  if   [ "$h" -gt 0 ]; then printf "%dh%dm" "$h" "$m"
+  elif [ "$m" -gt 0 ]; then printf "%dm%ds" "$m" "$sec"
+  else                      printf "%ds" "$sec"
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Line 3: context window
 # ---------------------------------------------------------------------------
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
@@ -311,7 +384,25 @@ if [ -n "$used_pct" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Line 4: rate-limit windows (5h / 7d)
+# Line 4: usage — subscription windows OR enterprise/API billing mode + cost
+#
+# The payload carries no billing-mode field. `rate_limits` is present only for
+# claude.ai subscription auth (Pro/Max/Team) and only after the first API
+# response; every other mode (API key, Bedrock, Vertex, Foundry, gateway) never
+# reports it. So:
+#   - rate_limits present  -> render whichever of the 5h/7d windows exist.
+#   - rate_limits absent, but a non-subscription auth env var is set
+#                          -> render "<mode>  session cost $X · duration Y".
+#   - rate_limits absent, no env var, but cost > 0
+#                          -> render the bare "session cost $X · duration Y"
+#                             (steady-state claude.ai enterprise: a positive cost
+#                             with no windows can only be a non-subscription mode).
+#   - rate_limits absent, no env var, cost 0
+#                          -> render nothing (a subscription session whose windows
+#                             have not populated yet — stay silent, don't mislabel).
+# Mode is detected from environment the CLI exports to this subprocess.
+# CLAUDE_CODE_OAUTH_TOKEN is deliberately NOT a signal: it is a subscription
+# token (from `claude setup-token`) and still reports rate_limits.
 # ---------------------------------------------------------------------------
 win_segment=""
 fh_pct=$(echo "$input"   | jq -r '.rate_limits.five_hour.used_percentage // empty')
@@ -319,15 +410,52 @@ fh_reset=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 sd_pct=$(echo "$input"   | jq -r '.rate_limits.seven_day.used_percentage // empty')
 sd_reset=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
-if [ -n "$fh_pct" ]; then
-  seg="5h:$(printf '%.0f' "$fh_pct")%"
-  r=$(fmt_reset "$fh_reset"); [ -n "$r" ] && seg="$seg (resets $r)"
-  win_segment="$seg"
-fi
-if [ -n "$sd_pct" ]; then
-  seg="7d:$(printf '%.0f' "$sd_pct")%"
-  r=$(fmt_reset "$sd_reset"); [ -n "$r" ] && seg="$seg (resets $r)"
-  [ -n "$win_segment" ] && win_segment="$win_segment   $seg" || win_segment="$seg"
+if [ -n "$fh_pct" ] || [ -n "$sd_pct" ]; then
+  # Subscription: render whichever windows are present.
+  if [ -n "$fh_pct" ]; then
+    seg="5h:$(printf '%.0f' "$fh_pct")%"
+    r=$(fmt_reset "$fh_reset"); [ -n "$r" ] && seg="$seg (resets $r)"
+    win_segment="$seg"
+  fi
+  if [ -n "$sd_pct" ]; then
+    seg="7d:$(printf '%.0f' "$sd_pct")%"
+    r=$(fmt_reset "$sd_reset"); [ -n "$r" ] && seg="$seg (resets $r)"
+    [ -n "$win_segment" ] && win_segment="$win_segment   $seg" || win_segment="$seg"
+  fi
+else
+  # No subscription windows — identify a non-subscription billing mode from env.
+  # Only these mean "windows will never come"; absent all of them we stay silent.
+  mode=""
+  if   [ -n "$CLAUDE_CODE_USE_BEDROCK" ]; then mode="bedrock"
+  elif [ -n "$CLAUDE_CODE_USE_VERTEX" ];  then mode="vertex"
+  elif [ -n "$CLAUDE_CODE_USE_FOUNDRY" ]; then mode="foundry"
+  elif [ -n "$ANTHROPIC_API_KEY" ];       then mode="api"
+  elif [ -n "$ANTHROPIC_AUTH_TOKEN" ] || [ -n "$ANTHROPIC_BASE_URL" ]; then mode="gateway"
+  fi
+  cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
+  cost_pos=$([ -n "$cost" ] && awk -v c="$cost" 'BEGIN{ if (c+0 > 0) print 1 }')
+  # Build a "session cost $X · duration Y" detail from the payload's cost block
+  # (a /cost-style readout — both fields are CLI-computed, so the total is
+  # authoritative; we don't recompute it). Per-model breakdown is NOT in the
+  # payload, so it's intentionally out of scope here.
+  cost_detail=""
+  if [ -n "$cost_pos" ]; then
+    cost_detail="session cost \$$(printf '%.2f' "$cost")"
+    d=$(fmt_dur "$(echo "$input" | jq -r '.cost.total_duration_ms // empty')")
+    [ -n "$d" ] && cost_detail="$cost_detail · duration $d"
+  fi
+  if [ -n "$mode" ]; then
+    # Explicit non-subscription env signal: label the mode, append cost detail.
+    win_segment="$mode"
+    [ -n "$cost_detail" ] && win_segment="$win_segment  $cost_detail"
+  elif [ -n "$cost_detail" ]; then
+    # No windows and no env signal, yet cost > 0. A subscription session with
+    # API activity would have populated rate_limits, and a fresh one has cost 0
+    # — so cost > 0 here means a non-subscription mode that exposes no env var
+    # (notably claude.ai *enterprise*). Show the cost detail so line 4 isn't
+    # blank. Bare (no mode word) since we can't name the billing path.
+    win_segment="$cost_detail"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -341,4 +469,8 @@ printf "%s" "$line1"
 [ -n "$branch_segment" ] && printf "\n%s" "$branch_segment"
 [ -n "$ctx_segment" ] && printf "\n%s" "$ctx_segment"
 [ -n "$win_segment" ] && printf "\n%s" "$win_segment"
+
+# Always succeed: a non-zero exit (e.g. the last test above being false when
+# line 4 is empty) can make Claude Code suppress the rendered status line.
+exit 0
 ```

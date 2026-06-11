@@ -3,13 +3,14 @@
 A multi-line Claude Code `statusLine` that reads everything from the JSON the CLI
 pipes to the status-line command on **stdin** — no external services, no polling.
 
-Rendered output:
+Rendered output — **subscription** (line 4 = rate-limit windows), and
+**enterprise / API** billing (line 4 = session cost + duration):
 
 ```
-Opus 4.8  ~/ws/edh_decks
-hanifz-dr1/iron_td_drafts ⎇ main
-ctx [██████░░░░░░░░] 43%   85k/1M
-5h:43% (resets 2h41m)   7d:18% (resets 4d3h)
+Opus 4.8  ~/ws/edh_decks                     Opus 4.8  ~/ws/edh_decks
+hanifz-dr1/iron_td_drafts ⎇ main             hanifz-dr1/iron_td_drafts ⎇ main
+ctx [██████░░░░░░░░] 43%   85k/1M            ctx [██░░░░░░░░░░░░] 12%   24k/1M
+5h:43% (resets 2h41m)   7d:18% (resets 4d3h) session cost $1.29 · duration 1h9m
 ```
 
 - **Line 1** — model display name + cwd (home shortened to `~`).
@@ -17,8 +18,13 @@ ctx [██████░░░░░░░░] 43%   85k/1M
   + branch as `⎇ <branch>`. Detached HEAD shows `⎇ <short-sha>`; a repo with no
   remote drops the path; outside any repo the line reads `⎇ no git`.
 - **Line 3** — context window as a 14-cell progress bar + compact token counts.
-- **Line 4** — the 5-hour and 7-day subscription rate-limit windows, each as
-  `% used` plus a countdown to reset.
+- **Line 4** — usage, adapting to billing mode: on a **subscription**
+  (claude.ai Pro/Max/Team) the 5-hour and 7-day rate-limit windows (`% used` +
+  reset countdown); on **enterprise/API/Bedrock/Vertex/Foundry/gateway** billing
+  (which report no windows) a `/cost`-style `session cost $X · duration Y`,
+  prefixed with the detected `mode` when an env var names it (e.g.
+  `api  session cost $0.74 · duration 12m34s`). Stays blank only when there are
+  no windows, no billing env, and no positive session cost.
 
 Every segment degrades gracefully: any field missing from the payload is omitted,
 and its line is dropped.
