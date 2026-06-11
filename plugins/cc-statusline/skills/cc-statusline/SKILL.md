@@ -1,6 +1,6 @@
 ---
 name: cc-statusline
-description: Install or port a 4-line Claude Code status line dashboard — line 1 model + cwd, line 2 the upstream git repo + branch, line 3 a context-window progress bar with token counts, line 4 usage that adapts to billing mode (subscription 5h & 7d rate-limit windows with reset countdowns, or for enterprise/API/Bedrock/Vertex/Foundry billing "session cost $X · duration Y", prefixed with the detected mode when an env var names it). Use when the user wants to set up, copy to another machine, troubleshoot, customize, or handle subscription vs enterprise billing for their Claude Code statusLine.
+description: Install or port a 4-line Claude Code status line dashboard — line 1 model + cwd, line 2 the upstream git repo + branch, line 3 a context-window progress bar with token counts, line 4 usage that adapts to billing mode (subscription 5h & 7d rate-limit windows with reset countdowns, or for enterprise/API/Bedrock/Vertex/Foundry billing "session cost $X · duration Y", prefixed with the detected mode when an env var names it). Ships two equivalent implementations — POSIX sh (macOS/Linux/WSL) and a Windows PowerShell 5.1 port. Use when the user wants to set up (incl. on Windows), copy to another machine, troubleshoot, customize, or handle subscription vs enterprise billing for their Claude Code statusLine.
 ---
 
 # Status line dashboard
@@ -119,11 +119,16 @@ Key facts that are easy to get wrong:
 
 ## Prerequisites
 
-POSIX `sh` plus: `jq`, `awk`, `date`, `sed`, and `git` (for line 2). All ship by
-default on macOS and typical Linux. (`bc` is **not** needed.) The reset-time
-formatter handles both GNU `date -d` (Linux) and BSD `date -j -f` (macOS)
-automatically. If `git` is absent the git line simply reads `⎇ no git`; the rest
-is unaffected.
+**macOS / Linux / WSL** (`statusline-command.sh`): POSIX `sh` plus: `jq`, `awk`,
+`date`, `sed`, and `git` (for line 2). All ship by default on macOS and typical
+Linux. (`bc` is **not** needed.) The reset-time formatter handles both GNU
+`date -d` (Linux) and BSD `date -j -f` (macOS) automatically. If `git` is absent
+the git line simply reads `⎇ no git`; the rest is unaffected.
+
+**Windows** (`statusline-command.ps1`, the bundled PowerShell port): Windows
+PowerShell 5.1 (preinstalled on Windows 10/11) — no `jq`, no bash, no WSL
+required — plus `git` on `PATH` for line 2 (absent → `⎇ no git`). Both scripts
+implement the same 4-line layout and line-4 billing logic; pick by platform.
 
 ## Install (idempotent — preserves existing settings)
 
@@ -154,6 +159,42 @@ When running this as a skill, `<this-skill-dir>` is this skill's own directory
 (the folder containing this SKILL.md). If the bundled script can't be located,
 recreate `~/.claude/statusline-command.sh` verbatim from the Reference script
 block at the bottom of this file, then `chmod +x` it.
+
+### Windows — alternate route (PowerShell, no bash/jq needed)
+
+On Windows install the bundled **`statusline-command.ps1`** instead. Two rules
+keep it working:
+
+1. **The `statusLine` command path MUST use forward slashes.** Claude Code
+   routes the command through **Git Bash when it is installed**, and bash strips
+   unquoted backslashes — `-File C:\Users\you\...` arrives at PowerShell as
+   `C:Usersyou...` and the status line silently shows nothing.
+2. **Keep the `.ps1` ASCII-only.** Windows PowerShell 5.1 reads BOM-less UTF-8
+   source as ANSI; the script therefore emits all glyphs (`█ ░ ⎇ ·`) via
+   `[char]0x....` codepoints. Don't paste literal glyphs into it when editing.
+
+```powershell
+# 1. Install the script (this skill folder ships statusline-command.ps1).
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude" | Out-Null
+Copy-Item "<this-skill-dir>\statusline-command.ps1" "$env:USERPROFILE\.claude\statusline-command.ps1"
+
+# 2. Wire it into settings.json (creates the file if absent, preserves the rest).
+#    Note the FORWARD-SLASH path (rule 1 above).
+$settings = "$env:USERPROFILE\.claude\settings.json"
+if (-not (Test-Path $settings)) { Set-Content $settings '{}' -Encoding utf8 }
+$j = Get-Content $settings -Raw | ConvertFrom-Json
+$cmd = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File ' +
+       ($env:USERPROFILE -replace '\\', '/') + '/.claude/statusline-command.ps1'
+$j | Add-Member -NotePropertyName statusLine `
+     -NotePropertyValue @{ type = 'command'; command = $cmd } -Force
+$j | ConvertTo-Json -Depth 16 | Set-Content $settings -Encoding utf8
+
+# 3. Verify (see "Verify" below); the live status line refreshes on the next render.
+```
+
+For a secondary profile (`CLAUDE_CONFIG_DIR`, e.g. `~/.claude-work`), copy the
+script into *that* directory and point *its* `settings.json` at it — same
+forward-slash rule.
 
 ## Verify
 
@@ -186,9 +227,38 @@ enterprise case prints a bare `session cost $0.74 · duration 12m34s`, and the
 API/Bedrock cases prefix it with the mode. (With `total_cost_usd` of 0 and an
 env var set, line 4 is just the bare mode label, e.g. `vertex`.)
 
+**Windows (PowerShell port).** Same payloads, same expected output. Pipe the
+payload from PowerShell:
+
+```powershell
+$ps1 = "$env:USERPROFILE\.claude\statusline-command.ps1"
+$now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+
+# Full dashboard — point current_dir at a real git checkout to populate line 2
+('{"model":{"display_name":"Opus 4.8"},"workspace":{"current_dir":"' +
+ ($PWD.Path -replace '\\', '\\\\') +
+ '"},"context_window":{"used_percentage":43,"total_input_tokens":85300,"context_window_size":1000000},' +
+ '"rate_limits":{"five_hour":{"used_percentage":43.2,"resets_at":' + ($now + 9660) +
+ '},"seven_day":{"used_percentage":17.8,"resets_at":' + ($now + 360000) + '}}}') |
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ps1
+
+# Enterprise / API-billed (no rate_limits) -> "session cost … · duration …"
+$ent = '{"model":{"display_name":"Opus 4.8"},"cwd":"C:\\Windows\\Temp","context_window":{"used_percentage":12,"total_input_tokens":24000,"context_window_size":1000000},"cost":{"total_cost_usd":0.74,"total_duration_ms":754000}}'
+$ent | powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ps1   # bare (enterprise)
+$env:ANTHROPIC_API_KEY = 'sk-test'
+$ent | powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ps1   # "api  session cost …"
+Remove-Item Env:ANTHROPIC_API_KEY
+```
+
+If you instead test through **Git Bash**, pipe a payload **file**
+(`cat payload.json | powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:/…/statusline-command.ps1`)
+— an inline single-quoted JSON string loses its `\\` escapes through bash and
+the script will (correctly) exit silently on the then-invalid JSON.
+
 ## After install — this is a one-off
 
-The status line now runs entirely from `~/.claude/statusline-command.sh` +
+The status line now runs entirely from the installed script
+(`~/.claude/statusline-command.sh`, or `statusline-command.ps1` on Windows) +
 the `statusLine` key in `~/.claude/settings.json`. It does **not** depend on this
 plugin staying installed. So once it's working you can retire the plugin so it
 stops being loaded as a skill every session:
@@ -223,6 +293,18 @@ settings, so the status line keeps rendering.
   of script runtime elapse — cosmetic only.
 - **`~` not expanded in the command.** The install uses an absolute `$HOME` path
   in `settings.json`, so this won't happen if you used the snippet above.
+- **(Windows) Blank status line, though the `.ps1` works when run by hand.** The
+  `statusLine` command path uses backslashes. Claude Code routes the command
+  through Git Bash when it is installed, and bash strips unquoted backslashes
+  (`C:\Users\…` arrives as `C:Users…` → "file does not exist" → blank). Use
+  forward slashes in the command: `-File C:/Users/<you>/.claude/statusline-command.ps1`.
+- **(Windows) Glyphs render as mojibake (`â–ˆ`, `?`).** The `.ps1` was edited
+  with literal glyphs. Windows PowerShell 5.1 reads BOM-less UTF-8 source as
+  ANSI — keep the file ASCII-only and emit glyphs via `[char]0x2588`-style
+  codepoints (as shipped).
+- **(Windows) Verify payloads print nothing through Git Bash.** Inline JSON
+  strings lose their `\\` escapes through bash; the script exits silently on
+  invalid JSON by design. Pipe a payload *file* instead (see Verify).
 
 ## Customization
 
@@ -241,12 +323,19 @@ settings, so the status line keeps rendering.
 - **Collapse to fewer lines**: concatenate
   `line1`/`branch_segment`/`ctx_segment`/`win_segment` with two spaces instead of
   `\n` at the bottom of the script.
+- **PowerShell port equivalents**: the same knobs exist in
+  `statusline-command.ps1` as `Make-Bar`, `$branchSegment`, `$ctxSegment`,
+  `$winSegment`, and `$costDetail` — same structure, same defaults. Keep edits
+  ASCII-only (see the Windows install notes).
 
 ## Reference script
 
 Canonical copy lives beside this file as `statusline-command.sh` (what the
 install step copies). This block mirrors it for reconstruction if the bundled
-file is unavailable — keep the two in sync.
+file is unavailable — keep the two in sync. The Windows port lives beside it as
+`statusline-command.ps1` (same layout and line-4 logic, PowerShell 5.1-safe,
+ASCII-only); it is not mirrored here — copy the bundled file, and when changing
+either script port the change to the other.
 
 ```sh
 #!/bin/sh

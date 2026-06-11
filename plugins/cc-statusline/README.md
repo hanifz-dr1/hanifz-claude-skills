@@ -34,13 +34,22 @@ and its line is dropped.
 | Path | What it is |
 |---|---|
 | `skills/cc-statusline/SKILL.md` | The install/port/troubleshoot/customize guide and the statusLine payload contract. |
-| `skills/cc-statusline/statusline-command.sh` | The canonical status-line script the install step copies to `~/.claude/statusline-command.sh`. |
+| `skills/cc-statusline/statusline-command.sh` | The canonical status-line script (macOS/Linux/WSL) the install step copies to `~/.claude/statusline-command.sh`. |
+| `skills/cc-statusline/statusline-command.ps1` | The Windows PowerShell 5.1 port — same 4-line layout and line-4 billing logic, no `jq`/bash needed. |
 
 ## Prerequisites
 
-POSIX `sh` plus `jq`, `awk`, `date`, `sed`, and `git` (for the git line). All ship
-by default on macOS and typical Linux. If `git` is absent the git line simply
-reads `⎇ no git`; the rest is unaffected.
+**macOS / Linux / WSL**: POSIX `sh` plus `jq`, `awk`, `date`, `sed`, and `git`
+(for the git line). All ship by default on macOS and typical Linux. If `git` is
+absent the git line simply reads `⎇ no git`; the rest is unaffected.
+
+**Windows**: just Windows PowerShell 5.1 (preinstalled) and `git` on `PATH` for
+the git line — use the bundled `statusline-command.ps1`. One critical wiring
+rule: the `statusLine` command path in `settings.json` must use **forward
+slashes** (`-File C:/Users/<you>/.claude/statusline-command.ps1`) because Claude
+Code routes the command through Git Bash when it is installed, and bash strips
+unquoted backslashes — a backslash path fails silently with a blank status line.
+Details in `SKILL.md`.
 
 ## Setup
 
