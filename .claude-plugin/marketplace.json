@@ -34,6 +34,24 @@
         "name": "Abdul Hanif Bin Zaini"
       },
       "source": "./plugins/codex-adversarial-review"
+    },
+    {
+      "name": "cc-statusline",
+      "description": "Install or port a multi-line Claude Code statusLine read entirely from the CLI's stdin JSON (no external services, no polling): model + cwd, upstream git repo + branch, a context-window progress bar with token counts, and the 5-hour & 7-day subscription rate-limit windows with reset countdowns. Idempotent install that preserves existing settings; every segment degrades gracefully.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Abdul Hanif Bin Zaini"
+      },
+      "source": "./plugins/cc-statusline"
+    },
+    {
+      "name": "claude-multi-account",
+      "description": "One-time setup of two isolated Claude Code accounts (work + personal) that run simultaneously via per-account CLAUDE_CONFIG_DIR shell wrappers. Keeps the existing login on bare `claude` and wraps only the second account so they never race over one credential slot; branches the design when the existing login is the sensitive work account. Self-deletes after verified success.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Abdul Hanif Bin Zaini"
+      },
+      "source": "./plugins/claude-multi-account"
     }
   ]
 }

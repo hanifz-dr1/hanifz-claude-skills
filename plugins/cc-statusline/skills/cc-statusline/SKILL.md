@@ -135,6 +135,20 @@ Expected: the first prints 4 lines (model/cwd, `<repo> ⎇ <branch>`,
 `ctx [...] 43% 85k/1M`, `5h:43% (resets …)   7d:18% (resets …)`); the second
 prints 3 lines, with `⎇ no git` for the git line and no rate-limit line.
 
+## After install — this is a one-off
+
+The status line now runs entirely from `~/.claude/statusline-command.sh` +
+the `statusLine` key in `~/.claude/settings.json`. It does **not** depend on this
+plugin staying installed. So once it's working you can retire the plugin so it
+stops being loaded as a skill every session:
+
+`/plugin uninstall cc-statusline@hanifz-claude-skills`
+
+(Leaving it installed is harmless — keep it if you want the troubleshoot /
+customize guidance below on hand; otherwise reinstall later only when you need
+it.) Uninstalling the plugin does not touch the installed script or your
+settings, so the status line keeps rendering.
+
 ## Troubleshooting
 
 - **Rate-limit line never appears.** Expected on a fresh session until the first

@@ -24,6 +24,7 @@ Then install any skill below:
 | [**md-to-docx-pdf**](plugins/md-to-docx-pdf/) | Render Markdown to a styled DOCX + PDF (via LibreOffice headless): title page, inline formatting, content-weighted auto-width tables, lists, code, embedded images. Single- or multi-document builds. Pairs with `drawio-figure-iterate`. |
 | [**codex-adversarial-review**](plugins/codex-adversarial-review/) | A two-round methodology for stress-testing prose, claims, or code with an adversarial second model (Codex): brief with attack vectors → synthesise adopt/reject/pushback → re-attack and rule on pushbacks. Requires a Codex MCP/CLI. |
 | [**cc-statusline**](plugins/cc-statusline/) | Install or port a multi-line Claude Code `statusLine` read entirely from the CLI's stdin JSON: model + cwd, upstream git repo + branch, a context-window progress bar with token counts, and the 5-hour & 7-day rate-limit windows with reset countdowns. Idempotent install; every segment degrades gracefully. |
+| [**claude-multi-account**](plugins/claude-multi-account/) | One-time setup of two isolated Claude Code accounts (work + personal) that run simultaneously via per-account `CLAUDE_CONFIG_DIR` shell wrappers. Keeps the existing login on bare `claude` and wraps only the second account so they never race over one credential slot; branches the design when the existing login is the sensitive work account. Self-deletes after verified success. |
 
 _More skills will be added over time. Each lives under `plugins/<name>/` with its
 own `README.md`, `SKILL.md`, and any helper scripts/MCP config._

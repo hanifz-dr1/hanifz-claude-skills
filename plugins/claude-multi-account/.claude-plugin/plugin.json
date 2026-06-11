@@ -1,0 +1,22 @@
+{
+  "name": "claude-multi-account",
+  "version": "0.1.0",
+  "description": "One-time setup of two isolated Claude Code accounts (e.g. enterprise/work + personal) that run simultaneously via per-account CLAUDE_CONFIG_DIR shell wrappers. Keeps the already-logged-in account on bare `claude` and wraps only the second account, so the two never contend for one credential slot (single-use OAuth token rotation otherwise forces re-login prompts). Branches the design when the existing login is the sensitive work account, and supports a symmetric two-wrapper mode. Works on Windows PowerShell 5.1/7, bash, zsh, and Git Bash; self-deletes after verified success.",
+  "author": {
+    "name": "Abdul Hanif Bin Zaini"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "multi-account",
+    "profiles",
+    "work-personal",
+    "CLAUDE_CONFIG_DIR",
+    "credentials",
+    "oauth",
+    "shell",
+    "powershell",
+    "bash",
+    "zsh"
+  ]
+}
