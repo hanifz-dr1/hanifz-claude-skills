@@ -1,0 +1,20 @@
+{
+  "name": "cc-statusline",
+  "version": "0.1.0",
+  "description": "Install or port a multi-line Claude Code statusLine dashboard read entirely from the JSON the CLI pipes on stdin (no external services, no polling): model + cwd, upstream git repo + branch, a context-window progress bar with token counts, and the 5-hour & 7-day subscription rate-limit windows with reset countdowns. Idempotent install that preserves existing settings; every segment degrades gracefully.",
+  "author": {
+    "name": "Abdul Hanif Bin Zaini"
+  },
+  "license": "MIT",
+  "keywords": [
+    "statusline",
+    "claude-code",
+    "dashboard",
+    "context-window",
+    "rate-limits",
+    "git-branch",
+    "jq",
+    "shell",
+    "settings"
+  ]
+}
