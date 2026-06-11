@@ -37,8 +37,8 @@
     },
     {
       "name": "cc-statusline",
-      "description": "Install or port a multi-line Claude Code statusLine read entirely from the CLI's stdin JSON (no external services, no polling): model + cwd, upstream git repo + branch, a context-window progress bar with token counts, and the 5-hour & 7-day subscription rate-limit windows with reset countdowns. Idempotent install that preserves existing settings; every segment degrades gracefully.",
-      "version": "0.1.0",
+      "description": "Install or port a multi-line Claude Code statusLine read entirely from the CLI's stdin JSON (no external services, no polling): model + cwd, upstream git repo + branch, a context-window progress bar with token counts, and the 5-hour & 7-day subscription rate-limit windows with reset countdowns. Ships POSIX-sh and Windows PowerShell implementations. Idempotent install that preserves existing settings; every segment degrades gracefully.",
+      "version": "0.2.0",
       "author": {
         "name": "Abdul Hanif Bin Zaini"
       },
