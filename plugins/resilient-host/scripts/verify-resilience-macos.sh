@@ -73,6 +73,14 @@ else
   note "FileVault is Off: unattended boot can proceed (pair with auto-login + a LaunchDaemon/Agent for no-login start)."
 fi
 
+# 6b. Auto-login -- needed for unattended (no-login) boot ----------------------
+ALU="$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null || true)"
+if [ -n "${ALU}" ]; then
+  note "auto-login enabled for '${ALU}' (unattended boot will start the agent)"
+else
+  note "auto-login off (fine for login-persistence; required for no-login boot)"
+fi
+
 # 7. Remote Login (SSH) -- needs sudo to read authoritatively ------------------
 note "SSH (Remote Login): verify with 'sudo systemsetup -getremotelogin'; enable with 'sudo systemsetup -setremotelogin on'."
 

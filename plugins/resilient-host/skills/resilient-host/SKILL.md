@@ -207,16 +207,26 @@ rather than implying full resilience.
 ## macOS variant (launchd)
 
 macOS has none of the Linux primitives (no systemd, no GRUB), so the layers map
-to different mechanisms. **First decide which goal applies — they need different
-amounts of work:**
+to different mechanisms — and there is **one decision you must put to the user
+before doing anything**, because it carries a real security tradeoff.
 
-- **Login-persistence (the common case, e.g. a Mac mini you log into):** "every
-  time I restart and log in, Claude remote control is just there." This is
-  **Layer 1 only**, done with a **launchd LaunchAgent** — no sudo, no FileVault
-  changes. Recommended default for a desktop Mac.
-- **Unattended (no-login) boot:** the Linux-style "comes up with nobody logged
-  in." On macOS this is gated by FileVault and the Keychain — see the caveats
-  below. Usually **not** what a desktop-Mac owner wants.
+> **ASK the user which mode they want — do not assume:**
+>
+> 1. **Login-persistence (default; recommended for a desktop Mac / Mac mini the
+>    owner sits at or logs into).** Claude remote control comes back **every time
+>    the owner logs in**. FileVault **stays on**, nothing is weakened. This is
+>    **Layer 1 only** — a launchd LaunchAgent, no sudo.
+> 2. **Run on boot with no login (true unattended host).** Claude comes up after
+>    a reboot / power-restore with **nobody logged in**. This **requires turning
+>    FileVault OFF** — otherwise the machine halts at the pre-boot unlock screen
+>    and *nothing* (SSH, launchd, Claude) starts until someone types the password
+>    at the machine. **Disabling FileVault leaves the disk unencrypted at rest**
+>    (physical theft → data exposure).
+>
+> Present both options, **name the FileVault tradeoff explicitly**, and let the
+> user choose. If they pick unattended boot, get **explicit confirmation that
+> they accept disabling FileVault** before running any of it. If they're unsure,
+> default to login-persistence (it changes nothing about their security posture).
 
 ### OS-primitive mapping
 
@@ -282,6 +292,33 @@ launchctl kickstart -k gui/$(id -u)/com.$USER.claude-remote   # restart
 launchctl bootout    gui/$(id -u)/com.$USER.claude-remote     # stop
 tail -f ~/.claude/claude-remote.err.log                   # supervisor log
 ```
+
+### Unattended boot (no login) — only if the user accepted disabling FileVault
+
+Skip this entirely for login-persistence. Do it **only** after the user has
+explicitly chosen option 2 above and accepted that FileVault gets turned off.
+
+The clean macOS path is **not** a root LaunchDaemon — it can't reach the login
+Keychain, so Claude can't authenticate. Instead: **disable FileVault + enable
+auto-login**, and keep the *same* LaunchAgent from Layer 1. Auto-login opens the
+GUI session at boot, which unlocks the Keychain and fires the agent — so Claude
+authenticates and starts with no one logged in.
+
+**Owner-run sudo** (only after explicit consent):
+```bash
+sudo fdesetup disable          # turn FileVault off — decrypts the disk, can take a while
+fdesetup status                # wait until it reports "FileVault is Off."
+```
+Then enable **auto-login**: System Settings → Users & Groups → "Automatically log
+in as …" → the owner (needs the login password; macOS hides this control while
+FileVault is on, which is why it comes after). Verify (no sudo):
+`defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser` → the
+username.
+
+After a reboot the box auto-logs in, the LaunchAgent fires, and Claude reaches
+`/rc active` with nobody at the keyboard. Pair with Layers 3 & 5 below for SSH and
+power-restore to complete the unattended story. (Re-encrypt anytime with
+`sudo fdesetup enable`; that also turns auto-login back off.)
 
 ### Layers 3 & 5 — optional, only for unattended use
 

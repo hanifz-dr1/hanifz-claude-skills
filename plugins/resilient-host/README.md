@@ -39,6 +39,11 @@ owners (e.g. a Mac mini) want only **login-persistence**: "every time I restart
 and log in, Claude remote control is just there." That's a **LaunchAgent** with
 `RunAtLoad` + `KeepAlive` — no sudo, no FileVault changes.
 
+Want it to come up **on boot with no login** instead? That requires **disabling
+FileVault** (disk unencrypted at rest) plus **auto-login**. The skill **asks you
+to choose** between the two modes and names the FileVault tradeoff up front — it
+won't disable FileVault without explicit consent.
+
 | Linux | macOS analog |
 |---|---|
 | systemd user service, `Restart=always` | **launchd LaunchAgent**, `RunAtLoad` + `KeepAlive`, inside tmux |
