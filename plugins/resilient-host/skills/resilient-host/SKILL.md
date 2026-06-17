@@ -9,7 +9,10 @@ description: >-
   boot with no login, SSH enabled, GRUB hidden/zero-timeout, and a BIOS power-on
   rule. TRIGGER when the user wants a reboot/power-loss-resilient remote Claude
   host, an auto-restarting headless claude session, or to verify/repair such a
-  setup. Privileged steps are owner-run sudo blocks. NOTE: OS/kernel-hang
+  setup — on Linux/systemd OR on macOS (a launchd LaunchAgent that brings the
+  `claude --remote-control` tmux session back on every login; see the "macOS
+  variant" section for the Mac mini / iMac case and its FileVault/Keychain
+  caveats). Privileged steps are owner-run sudo blocks. NOTE: OS/kernel-hang
   recovery (a hardware watchdog) is intentionally OUT OF SCOPE here and will be
   added later — do not claim the host survives a total kernel hang.
 ---
@@ -40,8 +43,11 @@ before deploying.
 
 | File | What it is |
 |---|---|
-| `scripts/claude-remote.service` | The systemd **user** unit (templated: `WorkingDirectory`, `<REMOTE_LABEL>`). |
-| `scripts/verify-resilience.sh` | End-to-end read-only checklist (no sudo); PASS/FAIL per layer. |
+| `scripts/claude-remote.service` | **Linux** systemd **user** unit (templated: `WorkingDirectory`, `<REMOTE_LABEL>`). |
+| `scripts/verify-resilience.sh` | **Linux** end-to-end read-only checklist (no sudo); PASS/FAIL per layer. |
+| `scripts/claude-remote.plist` | **macOS** LaunchAgent (templated: `__USER__`; edit `LABEL`/`WORKDIR` in the wrapper). |
+| `scripts/claude-remote-launch.sh` | **macOS** supervisor wrapper: API-wait → tmux PTY → `claude --remote-control`, blocks so launchd can relaunch. |
+| `scripts/verify-resilience-macos.sh` | **macOS** read-only checklist (no sudo for core layers); PASS/FAIL/WARN per layer. |
 
 ## Privilege model
 
@@ -195,3 +201,139 @@ tmux -L claude list-sessions                                                    
 When reporting status, enumerate exactly which layers are live and which are not.
 Remember the **OS/kernel-hang** case is **not covered** by this skill yet — say so
 rather than implying full resilience.
+
+---
+
+## macOS variant (launchd)
+
+macOS has none of the Linux primitives (no systemd, no GRUB), so the layers map
+to different mechanisms — and there is **one decision you must put to the user
+before doing anything**, because it carries a real security tradeoff.
+
+> **ASK the user which mode they want — do not assume:**
+>
+> 1. **Login-persistence (default; recommended for a desktop Mac / Mac mini the
+>    owner sits at or logs into).** Claude remote control comes back **every time
+>    the owner logs in**. FileVault **stays on**, nothing is weakened. This is
+>    **Layer 1 only** — a launchd LaunchAgent, no sudo.
+> 2. **Run on boot with no login (true unattended host).** Claude comes up after
+>    a reboot / power-restore with **nobody logged in**. This **requires turning
+>    FileVault OFF** — otherwise the machine halts at the pre-boot unlock screen
+>    and *nothing* (SSH, launchd, Claude) starts until someone types the password
+>    at the machine. **Disabling FileVault leaves the disk unencrypted at rest**
+>    (physical theft → data exposure).
+>
+> Present both options, **name the FileVault tradeoff explicitly**, and let the
+> user choose. If they pick unattended boot, get **explicit confirmation that
+> they accept disabling FileVault** before running any of it. If they're unsure,
+> default to login-persistence (it changes nothing about their security posture).
+
+### OS-primitive mapping
+
+| # | Failure mode | Linux | macOS analog |
+|---|---|---|---|
+| 1 | Session crashes/exits | systemd user service, `Restart=always` | **launchd LaunchAgent**, `KeepAlive=true` + `RunAtLoad=true`, inside tmux |
+| 2 | Reboot — no one logged in | linger | **owner logs in** (login-persistence) *or* **auto-login** (unattended; FileVault-incompatible) |
+| 3 | SSH after reboot | `systemctl enable ssh` | **Remote Login**: `sudo systemsetup -setremotelogin on` |
+| 4 | Bootloader pause | `GRUB_TIMEOUT=0` | **N/A** — Macs have no GRUB pause |
+| 5 | Power outage → restored | BIOS (firmware, unreadable) | `sudo pmset -a autorestart 1` — **software-settable AND readable** |
+
+### Two macOS-specific caveats (both = FileVault)
+
+- **FileVault gates unattended boot.** With FileVault **on**, a reboot/power-restore
+  halts at the pre-boot unlock screen until someone types the password at the
+  machine — so SSH, launchd jobs, and Claude all stay down until then. This does
+  **not** affect login-persistence (you unlock + log in, then the agent fires).
+  True no-login boot requires turning FileVault **off** (disk unencrypted at rest
+  — a real security tradeoff) plus **auto-login** (which FileVault disables).
+- **Credentials are Keychain-backed, not a file.** On macOS, Claude stores creds
+  in the login Keychain (`Claude Code-credentials`), which is unlocked by GUI
+  login. A LaunchAgent in the Aqua session inherits the unlocked Keychain, so it
+  authenticates fine. A root LaunchDaemon (no GUI login) would **not** — another
+  reason login-persistence is the clean path. (There is no `~/.claude/.credentials.json`
+  on macOS; that Linux prereq does not apply.)
+
+### Layer 1 — LaunchAgent (login-persistence)
+
+A **LaunchAgent** runs in the user's GUI session, so it starts at login with the
+Keychain already unlocked. Deploy from `scripts/`:
+
+1. `brew install tmux` (required — `claude --remote-control` needs a real PTY).
+2. Copy `scripts/claude-remote-launch.sh` → `~/.local/bin/claude-remote-launch.sh`,
+   `chmod +x`, and edit `LABEL` (the name shown in claude.ai / the mobile app) and
+   `WORKDIR` at the top.
+3. Copy `scripts/claude-remote.plist` → `~/Library/LaunchAgents/com.$USER.claude-remote.plist`,
+   then replace every `__USER__` **inside** the file with your username (`echo $USER`).
+   Keep `RunAtLoad`+`KeepAlive` (start-at-login +
+   relaunch-on-crash) and the `PATH` (include the Homebrew prefix **and** wherever
+   `node` lives, or user Stop hooks fail with `node: command not found`).
+4. Load + start now:
+   ```bash
+   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.$USER.claude-remote.plist
+   launchctl kickstart -k gui/$(id -u)/com.$USER.claude-remote
+   ```
+
+Why the wrapper blocks (don't "fix" it): launchd `KeepAlive` relaunches the
+ProgramArguments when they exit. `tmux new-session -d` forks and returns
+immediately, which would make launchd respawn in a tight loop. So the wrapper
+starts the detached session, then **blocks on `tmux has-session`** and only exits
+when Claude actually dies — that's what makes `KeepAlive` behave like
+`Restart=always`. The API-reachability wait is the same idea as the Linux unit's
+`ExecStartPre`.
+
+On first launch Claude shows a **"trust this folder"** prompt for `WORKDIR`; it
+blocks remote control until answered. Confirm it once (`tmux -L claude attach -t main`,
+press Enter) — trust persists, so later relaunches go straight to `/rc active`.
+
+Manage / observe (all user-level, no sudo):
+```bash
+tmux -L claude attach -t main                              # watch live; detach Ctrl-b d
+launchctl kickstart -k gui/$(id -u)/com.$USER.claude-remote   # restart
+launchctl bootout    gui/$(id -u)/com.$USER.claude-remote     # stop
+tail -f ~/.claude/claude-remote.err.log                   # supervisor log
+```
+
+### Unattended boot (no login) — only if the user accepted disabling FileVault
+
+Skip this entirely for login-persistence. Do it **only** after the user has
+explicitly chosen option 2 above and accepted that FileVault gets turned off.
+
+The clean macOS path is **not** a root LaunchDaemon — it can't reach the login
+Keychain, so Claude can't authenticate. Instead: **disable FileVault + enable
+auto-login**, and keep the *same* LaunchAgent from Layer 1. Auto-login opens the
+GUI session at boot, which unlocks the Keychain and fires the agent — so Claude
+authenticates and starts with no one logged in.
+
+**Owner-run sudo** (only after explicit consent):
+```bash
+sudo fdesetup disable          # turn FileVault off — decrypts the disk, can take a while
+fdesetup status                # wait until it reports "FileVault is Off."
+```
+Then enable **auto-login**: System Settings → Users & Groups → "Automatically log
+in as …" → the owner (needs the login password; macOS hides this control while
+FileVault is on, which is why it comes after). Verify (no sudo):
+`defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser` → the
+username.
+
+After a reboot the box auto-logs in, the LaunchAgent fires, and Claude reaches
+`/rc active` with nobody at the keyboard. Pair with Layers 3 & 5 below for SSH and
+power-restore to complete the unattended story. (Re-encrypt anytime with
+`sudo fdesetup enable`; that also turns auto-login back off.)
+
+### Layers 3 & 5 — optional, only for unattended use
+
+- **SSH (Layer 3), owner-run sudo:** `sudo systemsetup -setremotelogin on`
+  (persists across reboot). Verify: `sudo systemsetup -getremotelogin`.
+- **Power-on after outage (Layer 5), owner-run sudo:** `sudo pmset -a autorestart 1`.
+  Verify (no sudo): `pmset -g | grep autorestart` → `1`. Better than the NUC —
+  this is readable from software. Also keep it awake: `sudo pmset -a sleep 0`.
+
+### Verify (macOS)
+
+```bash
+scripts/verify-resilience-macos.sh [com.$USER.claude-remote]
+```
+PASS/FAIL on the login-persistence layers (LaunchAgent running, RunAtLoad+KeepAlive,
+tmux session, claude process); WARN/NOTE on the optional unattended layers
+(`pmset autorestart`, FileVault, SSH). The **kernel-hang** caveat applies on macOS
+too — there is no user watchdog here either.

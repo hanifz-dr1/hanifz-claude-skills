@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  macOS LaunchAgent for the resilient-host skill (login-persistence variant).
+
+  This is the macOS analog of claude-remote.service. A LaunchAgent runs in the
+  user's GUI (Aqua) session, so it starts when the owner LOGS IN — which has
+  already unlocked the login Keychain, so Claude's macOS-Keychain credentials
+  work with no extra steps. RunAtLoad starts it at login; KeepAlive relaunches
+  the supervisor if Claude ever exits/crashes.
+
+  Substitute before deploying (plist is XML, so the placeholder is __USER__, not
+  an angle-bracket token):
+    __USER__  -> your short username from `echo $USER` (so /Users/__USER__/...
+                 paths and the com.__USER__.claude-remote Label resolve)
+  Copy to ~/Library/LaunchAgents/com.__USER__.claude-remote.plist.
+  Edit LABEL / WORKDIR inside claude-remote-launch.sh (not here).
+
+  NOTE: this covers the "starts every time I log in" case only. Starting with
+  NO login (true unattended boot) needs auto-login, which is incompatible with
+  FileVault — see SKILL.md "macOS variant".
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.__USER__.claude-remote</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/__USER__/.local/bin/claude-remote-launch.sh</string>
+    </array>
+
+    <!-- launchd gives agents a minimal PATH. Include both Homebrew prefixes
+         (/opt/homebrew on Apple Silicon, /usr/local on Intel), the claude dir,
+         and wherever `node` lives (/usr/local/bin here) so user hooks resolve. -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/Users/__USER__/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>/Users/__USER__</string>
+    </dict>
+
+    <!-- Start at login, and relaunch if the supervisor ever exits. -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <!-- Keep it responsive: exempt from App Nap / background throttling. -->
+    <key>ProcessType</key>
+    <string>Interactive</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/__USER__/.claude/claude-remote.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/__USER__/.claude/claude-remote.err.log</string>
+</dict>
+</plist>

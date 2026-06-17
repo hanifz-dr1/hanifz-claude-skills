@@ -1,7 +1,7 @@
 {
   "name": "resilient-host",
-  "version": "0.1.0",
-  "description": "Set up and verify a reboot/power-loss-resilient Claude Code remote-control host: a systemd user service that runs `claude --remote-control` inside a dedicated tmux PTY with Restart=always and an API-reachability pre-check, user linger so it starts at boot with no login, SSH enabled, GRUB hidden/zero-timeout so unclean boots don't pause, and a BIOS power-on rule. Each failure mode (power outage, GRUB hang, session crash, no-login reboot) maps to a distinct layer. Privileged steps are owner-run sudo blocks. OS/kernel-hang recovery (a hardware watchdog) is intentionally out of scope for now and will be added later; the skill does not claim the host survives a kernel hang.",
+  "version": "0.2.0",
+  "description": "Set up and verify a reboot/power-loss-resilient Claude Code remote-control host on Linux or macOS. Linux: a systemd user service that runs `claude --remote-control` inside a dedicated tmux PTY with Restart=always and an API-reachability pre-check, user linger so it starts at boot with no login, SSH enabled, GRUB hidden/zero-timeout so unclean boots don't pause, and a BIOS power-on rule. macOS: a launchd LaunchAgent (RunAtLoad + KeepAlive) that brings the tmux `claude --remote-control` session back on every login, with pmset power-on, Remote Login, and FileVault/Keychain caveats for unattended boot. Each failure mode (power outage, bootloader pause, session crash, no-login reboot) maps to a distinct layer. Privileged steps are owner-run sudo blocks. OS/kernel-hang recovery (a hardware watchdog) is intentionally out of scope for now and will be added later; the skill does not claim the host survives a kernel hang.",
   "author": {
     "name": "Abdul Hanif Bin Zaini"
   },
@@ -10,6 +10,9 @@
     "claude-code",
     "remote-control",
     "systemd",
+    "launchd",
+    "macos",
+    "pmset",
     "tmux",
     "linger",
     "resilience",
