@@ -1,0 +1,29 @@
+[Unit]
+Description=Claude Code remote-control session (auto-start, reboot-resilient)
+# network-online.target is not visible to the user manager, and `claude
+# --remote-control` does NOT exit when it can't reach the network -- it stays
+# running with "/rc failed", so Restart=always never fires. We therefore BLOCK
+# in ExecStartPre until the Anthropic API is actually reachable before launching
+# Claude. Restart=always remains an outer safety net if the wait times out.
+
+[Service]
+Type=forking
+# WorkingDirectory: substitute the directory you want Claude to start in.
+WorkingDirectory=%h/ws/test_ws
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+# Clean up any stale dedicated tmux server before (re)starting (ignore errors).
+ExecStartPre=-/usr/bin/tmux -L claude kill-server
+# Wait (up to ~60s) for DNS + TLS connectivity to the API before starting Claude,
+# so remote control can actually register. Exit 1 on timeout -> Restart retries.
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 30); do getent hosts api.anthropic.com >/dev/null 2>&1 && curl -sS -o /dev/null --max-time 5 https://api.anthropic.com 2>/dev/null && exit 0; sleep 2; done; echo "network not ready after wait" >&2; exit 1'
+# Run claude inside a dedicated tmux server (-L claude) so it gets a real PTY
+# and survives independently of any interactive tmux you use.
+# Substitute <REMOTE_LABEL> with the remote-control session label you want to
+# see in claude.ai / the mobile app (e.g. resilient-host).
+ExecStart=/usr/bin/tmux -L claude new-session -d -s main %h/.local/bin/claude --remote-control <REMOTE_LABEL>
+ExecStop=/usr/bin/tmux -L claude kill-server
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

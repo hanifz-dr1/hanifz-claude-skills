@@ -52,6 +52,15 @@
         "name": "Abdul Hanif Bin Zaini"
       },
       "source": "./plugins/claude-multi-account"
+    },
+    {
+      "name": "resilient-host",
+      "description": "Set up and verify a reboot/power-loss-resilient Claude Code remote-control host as independent layers: a systemd user service running `claude --remote-control` inside a dedicated tmux PTY (Restart=always + API pre-check), user linger for no-login boot, SSH enabled, GRUB hidden/zero-timeout, and a BIOS power-on rule. Privileged steps are owner-run sudo blocks. OS/kernel-hang recovery (a hardware watchdog) is intentionally out of scope for now and will be added later.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Abdul Hanif Bin Zaini"
+      },
+      "source": "./plugins/resilient-host"
     }
   ]
 }

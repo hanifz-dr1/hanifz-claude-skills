@@ -1,0 +1,22 @@
+{
+  "name": "resilient-host",
+  "version": "0.1.0",
+  "description": "Set up and verify a reboot/power-loss-resilient Claude Code remote-control host: a systemd user service that runs `claude --remote-control` inside a dedicated tmux PTY with Restart=always and an API-reachability pre-check, user linger so it starts at boot with no login, SSH enabled, GRUB hidden/zero-timeout so unclean boots don't pause, and a BIOS power-on rule. Each failure mode (power outage, GRUB hang, session crash, no-login reboot) maps to a distinct layer. Privileged steps are owner-run sudo blocks. OS/kernel-hang recovery (a hardware watchdog) is intentionally out of scope for now and will be added later; the skill does not claim the host survives a kernel hang.",
+  "author": {
+    "name": "Abdul Hanif Bin Zaini"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "remote-control",
+    "systemd",
+    "tmux",
+    "linger",
+    "resilience",
+    "reboot",
+    "power-loss",
+    "ssh",
+    "grub",
+    "headless"
+  ]
+}
