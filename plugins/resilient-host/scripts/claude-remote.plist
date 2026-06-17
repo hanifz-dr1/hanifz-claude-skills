@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
   macOS LaunchAgent for the resilient-host skill (login-persistence variant).
 
   This is the macOS analog of claude-remote.service. A LaunchAgent runs in the
-  user's GUI (Aqua) session, so it starts when the owner LOGS IN -- which has
+  user's GUI (Aqua) session, so it starts when the owner LOGS IN — which has
   already unlocked the login Keychain, so Claude's macOS-Keychain credentials
   work with no extra steps. RunAtLoad starts it at login; KeepAlive relaunches
   the supervisor if Claude ever exits/crashes.
@@ -17,7 +18,7 @@
 
   NOTE: this covers the "starts every time I log in" case only. Starting with
   NO login (true unattended boot) needs auto-login, which is incompatible with
-  FileVault -- see SKILL.md "macOS variant".
+  FileVault — see SKILL.md "macOS variant".
 -->
 <plist version="1.0">
 <dict>
